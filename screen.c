@@ -15,11 +15,11 @@ struct {
   void(*show)();
   void(*close)();
 } screens[N_SCREENS] = {
-  [SCREEN_MENU] = { menu_screen_init, menu_screen_show, menu_screen_close},
-  [SCREEN_SP] = { dummy, dummy, dummy},
-  [SCREEN_MP] = { dummy, dummy, dummy},
-  [SCREEN_START_SERVER] = { dummy, dummy, dummy},
-  [SCREEN_CONNECT] = { dummy, dummy, dummy}
+  [SCREEN_MENU] = { menu_screen_init, menu_screen_show, menu_screen_close },
+  [SCREEN_SP] = { dummy, dummy, dummy },
+  [SCREEN_MP] = { dummy, dummy, dummy },
+  [SCREEN_START_SERVER] = { dummy, dummy, dummy },
+  [SCREEN_CONNECT] = { dummy, dummy, dummy }
 };
 
 void set_current_screen(int screen) {
