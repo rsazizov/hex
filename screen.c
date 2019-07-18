@@ -5,6 +5,7 @@
 #include <assert.h>
 
 #include "menu_screen.h"
+#include "singleplayer_screen.h"
 
 void dummy() {}
 
@@ -16,7 +17,7 @@ struct {
   void(*close)();
 } screens[N_SCREENS] = {
   [SCREEN_MENU] = { menu_screen_init, menu_screen_show, menu_screen_close },
-  [SCREEN_SP] = { dummy, dummy, dummy },
+  [SCREEN_SP] = { singleplayer_screen_init, singleplayer_screen_show, singleplayer_screen_close },
   [SCREEN_MP] = { dummy, dummy, dummy },
   [SCREEN_START_SERVER] = { dummy, dummy, dummy },
   [SCREEN_CONNECT] = { dummy, dummy, dummy }

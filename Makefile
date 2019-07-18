@@ -1,12 +1,12 @@
 CC = gcc
-CFLAGS += -Wall -Werror -Wextra -pedantic
+CFLAGS += -Wall #-Werror -Wextra -pedantic
 LIBS += -lm -lncurses -lmenu -lform
 ODIR = obj
 EXE = hex
 
-DEPS = screen.h menu_screen.h utils.h text_res.h
+DEPS = screen.h menu_screen.h utils.h text_res.h singleplayer_screen.h board.h
 
-_OBJ = main.o screen.o menu_screen.o utils.o
+_OBJ = main.o screen.o menu_screen.o utils.o singleplayer_screen.o board.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 $(ODIR)/%.o: %.c $(DEPS)
