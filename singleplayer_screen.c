@@ -134,11 +134,15 @@ void singleplayer_loop() {
         cursor->y++;
         break;
 
+      case 'r':
+        singleplayer_reset();
+
+        break;
+
       case 10:
         if (Board_is_game_over(board)) {
-          // Board_reset(board);
-          // TODO: Reset the game
-          return;
+          singleplayer_reset();
+          break;
         }
 
         Board_make_move(board, cursor->y, cursor->x);
@@ -167,6 +171,15 @@ void singleplayer_loop() {
     
     Board_show(board);
   }
+}
+
+void singleplayer_reset() {
+  Board_reset(board);
+  scoreboard_show(scoreboard_wnd, players, board->current_player - 1);
+  
+  move(LINES - 1, 0);
+  clrtoeol();
+  printw("Use arrow keys to move. Press enter to make a move. Press \'r\' to restart.");
 }
 
 void singleplayer_screen_init() {
@@ -206,8 +219,7 @@ void singleplayer_screen_show() {
   wrefresh(board_wnd);
   refresh();
 
-  move(LINES - 1, 0);
-  printw("Use arrow keys to move. Enter to make a move.");
+  singleplayer_reset();
 
   singleplayer_loop();
 }

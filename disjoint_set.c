@@ -7,17 +7,21 @@ DisjointSet* DisjointSet_create(size_t n) {
   
   set->n = n;
   set->arr = calloc(n, sizeof(*set->arr));
-
-  for (size_t i = 0; i < n; ++i) {
-    set->arr[i] = i;
-  }
   
+  DisjointSet_reset(set);
+
   return set;
 }
 
 void DisjointSet_free(DisjointSet* set) {
   free(set->arr);
   free(set);
+}
+
+void DisjointSet_reset(DisjointSet* set) {
+  for (size_t i = 0; i < set->n; ++i) {
+    set->arr[i] = i;
+  }
 }
 
 size_t DisjointSet_size(DisjointSet* set, size_t x) {

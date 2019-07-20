@@ -11,9 +11,6 @@ static const int TOP_NODE_ID = BOARD_SIZE * BOARD_SIZE + 1;
 Board* Board_create(WINDOW* wnd) {
   Board* board = malloc(sizeof(Board));
 
-  board->current_player = Red;
-  board->winner = 0;
-
   assert(wnd != NULL);
   board->wnd = wnd;
 
@@ -21,18 +18,6 @@ Board* Board_create(WINDOW* wnd) {
   board->sets[1] = DisjointSet_create(BOARD_SIZE * BOARD_SIZE + 2);
 
   Board_reset(board);
-
-  // DisjointSet_union(board->sets[0], 1, 2);
-
-  for (int i = 0; i < BOARD_SIZE; ++i) {
-    DisjointSet_union(board->sets[0], Board_yx_to_node_id(i, 0), TOP_NODE_ID);
-    DisjointSet_union(board->sets[0], Board_yx_to_node_id(i, BOARD_SIZE - 1), BOTTOM_NODE_ID);
-  }
-
-  for (int i = 0; i < BOARD_SIZE; ++i) {
-    DisjointSet_union(board->sets[1], Board_yx_to_node_id(0, i), TOP_NODE_ID);
-    DisjointSet_union(board->sets[1], Board_yx_to_node_id(BOARD_SIZE - 1, i), BOTTOM_NODE_ID);
-  }
 
   return board;
 }
@@ -47,8 +32,25 @@ void Board_free(Board* board) {
 void Board_reset(Board* board) {
   memset(board->state, 0, sizeof(board->state));
 
+  board->winner = 0;
+  board->current_player = Red;
+
   board->cursor.x = 0;
   board->cursor.y = 0;
+
+  for (int i = 0; i < 2; ++i) {
+    DisjointSet_reset(board->sets[i]);
+  }
+  
+  for (int i = 0; i < BOARD_SIZE; ++i) {
+    DisjointSet_union(board->sets[0], Board_yx_to_node_id(i, 0), TOP_NODE_ID);
+    DisjointSet_union(board->sets[0], Board_yx_to_node_id(i, BOARD_SIZE - 1), BOTTOM_NODE_ID);
+  }
+
+  for (int i = 0; i < BOARD_SIZE; ++i) {
+    DisjointSet_union(board->sets[1], Board_yx_to_node_id(0, i), TOP_NODE_ID);
+    DisjointSet_union(board->sets[1], Board_yx_to_node_id(BOARD_SIZE - 1, i), BOTTOM_NODE_ID);
+  }
 }
 
 void Board_show_cell(Board* board, int j, int i) {

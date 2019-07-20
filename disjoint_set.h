@@ -14,6 +14,8 @@ typedef struct DisjointSet {
 DisjointSet* DisjointSet_create(size_t n);
 void DisjointSet_free(DisjointSet* set);
 
+void DisjointSet_reset(DisjointSet* set);
+
 size_t DisjointSet_size(DisjointSet* set, size_t x);
 size_t DisjointSet_find(DisjointSet* set, size_t x);
 void DisjointSet_union(DisjointSet* set, size_t x, size_t y);

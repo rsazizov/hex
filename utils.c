@@ -1,5 +1,7 @@
 #include "utils.h"
+
 #include <string.h>
+#include <ctype.h>
 
 int get_window_width(void) {
   return getmaxx(stdscr);
