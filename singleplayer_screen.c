@@ -6,6 +6,7 @@
 
 #include "utils.h"
 #include "board.h"
+#include "scoreboard.h"
 
 void name_dialog_loop(WINDOW* dialog_wnd, FORM* form, FIELD** fields,
                       char** player1, char** player2) {
@@ -102,9 +103,60 @@ void name_dialog(char** player1, char** player2) {
 }
 
 static Board* board;
+static WINDOW* scoreboard_wnd;
+static const char* players[2];
+
+void singleplayer_loop() {
+  // HACK: 
+  WINDOW* board_wnd = board->wnd;
+
+  Point* cursor = &board->cursor;
+
+  int ch;
+
+  while (1) {
+    ch = getch();
+     
+    switch (ch) {
+      case KEY_LEFT:
+        cursor->x--;
+        break;
+      case KEY_RIGHT:
+        cursor->x++;
+        break;
+
+      case KEY_UP:
+        cursor->y--;
+        break;
+
+      case KEY_DOWN:
+        cursor->y++;
+        break;
+
+      case 10:
+        Board_make_move(board, board->current_player, cursor->y, cursor->x);
+        scoreboard_show(scoreboard_wnd, players, board->current_player);
+
+        break;
+    }
+
+    if (cursor->x >= BOARD_SIZE) cursor->x = 0;
+    if (cursor->x < 0) cursor->x = BOARD_SIZE - 1;
+
+    if (cursor->y >= BOARD_SIZE) cursor->y = 0;
+    if (cursor->y < 0) cursor->y = BOARD_SIZE - 1;
+
+    werase(board_wnd);
+    wrefresh(board_wnd);
+    
+    Board_show(board);
+  }
+}
 
 void singleplayer_screen_init() {
   curs_set(1);
+
+  scoreboard_wnd = newwin(4, 25, 0, 70 - 25);
 }
 
 void singleplayer_screen_show() {
@@ -121,6 +173,9 @@ void singleplayer_screen_show() {
     player2 = "Player 2";
   }
 
+  players[0] = player1;
+  players[1] = player2;
+
   erase();
   refresh();
 
@@ -130,11 +185,17 @@ void singleplayer_screen_show() {
   board = Board_create(board_wnd);
 
   Board_show(board);
+  scoreboard_show(scoreboard_wnd, players, board->current_player);
 
   wrefresh(board_wnd);
   refresh();
+
+  singleplayer_loop();
 }
 
 void singleplayer_screen_close() {
   Board_free(board);
+  
+  delwin(scoreboard_wnd);
+  delwin(board->wnd);
 }

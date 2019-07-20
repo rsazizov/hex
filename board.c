@@ -23,29 +23,32 @@ void Board_free(Board* board) {
 
 void Board_reset(Board* board) {
   memset(board->state, 0, sizeof(board->state));
+
   board->cursor.x = 0;
   board->cursor.y = 0;
 }
 
-void Board_show_cell(Board* board, int i, int j) {
+void Board_show_cell(Board* board, int j, int i) {
   const char* hex = "⬡";
   const char* hex_full = "⬢";
 
-  int hex_state = board->state[i - 1][j];
+  int hex_state = board->state[i][j];
 
   int color_pair = hex_state + 1;
 
-  bool current = (board->cursor.y == i - 1) && (board->cursor.x == j);
+  bool current = (board->cursor.y == j) && (board->cursor.x == i);
+  
   if (current) {
     color_pair += 3;
   } else {
-    if ((hex_state == 0 && i == 1 && j > 0 && j < BOARD_SIZE)
-      || (hex_state == 0 && i == BOARD_SIZE - 1 && j > 0 && j < BOARD_SIZE)) {
+    // Color cells that are on the edges of the board
+    if ((hex_state == 0 && i == 0 && j > 0 && j < BOARD_SIZE - 1)
+      || (hex_state == 0 && i == BOARD_SIZE - 1 && j > 0 && j < BOARD_SIZE - 1)) {
       color_pair = 7;
     }
 
-    if ((hex_state == 0 && j == 0 && i > 1 && i < BOARD_SIZE)
-      || (hex_state == 0 && j == BOARD_SIZE - 1 && i > 1 && i < BOARD_SIZE)) {
+    if ((hex_state == 0 && j == 0 && i > 0 && i < BOARD_SIZE - 1)
+      || (hex_state == 0 && j == BOARD_SIZE - 1 && i > 0 && i < BOARD_SIZE - 1)) {
       color_pair = 8;
     }
   }
@@ -65,7 +68,6 @@ void init_color_pairs() {
   init_pair(2, COLOR_RED, COLOR_BLACK);
   init_pair(3, COLOR_BLUE, COLOR_BLACK);
 
-  // current
   init_pair(4, COLOR_BLACK, COLOR_WHITE);
   init_pair(5, COLOR_RED, COLOR_WHITE);
   init_pair(6, COLOR_BLUE, COLOR_WHITE);
@@ -87,14 +89,14 @@ void Board_show(Board* board) {
 
   waddch(board->wnd, '\n');
 
-  for (int i = 1; i <= BOARD_SIZE; ++i) {
+  for (int i = 0; i < BOARD_SIZE; ++i) {
 
-    for (int s = 1; s < i; ++s) {
+    for (int k = 0; k < i; ++k) {
       waddch(board->wnd, ' ');
     }
 
-    if (i < 10) wprintw(board->wnd, "%d  ", i);
-    else wprintw(board->wnd, "%d ", i);
+    if (i < 9) wprintw(board->wnd, "%d  ", i + 1);
+    else wprintw(board->wnd, "%d ", i + 1);
 
     for (int j = 0; j < BOARD_SIZE; ++j) {
       Board_show_cell(board, i, j);
@@ -107,17 +109,22 @@ void Board_show(Board* board) {
 }
 
 bool Board_is_legal_move(Board* board, int y, int x) {
-  return y >=0 ;
+  return y >= 0 && y < BOARD_SIZE && x >= 0 && x < BOARD_SIZE;
 }
 
-int Board_get_current_player() {
-  return 0;
+int Board_get_current_player(Board* board) {
+  return board->current_player;
 }
 
 bool Board_can_move(Board* board, int y, int x) {
-  return false;
+  return Board_is_legal_move(board, y, x)
+    && board->state[y][x] == 0;
 }
 
 bool Board_make_move(Board* board, int player, int y, int x) {
+  if (!Board_can_move(board, y, x)) {
+    return false;
+  }
+
   return false;
 }

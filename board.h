@@ -23,7 +23,7 @@ void Board_show(Board* board);
 bool Board_is_legal_move(Board* board, int y, int x);
 
 // Returns the player who has to make a move
-int Board_get_current_player();
+int Board_get_current_player(Board* board);
 
 // Checks if the cell at (y, x) is free
 bool Board_can_move(Board* board, int y, int x);
