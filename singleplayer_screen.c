@@ -107,6 +107,15 @@ static Board* board;
 static WINDOW* scoreboard_wnd;
 static const char* players[2];
 
+void singleplayer_reset() {
+  Board_reset(board);
+  scoreboard_show(scoreboard_wnd, players, board->current_player - 1);
+  
+  move(LINES - 1, 0);
+  clrtoeol();
+  printw("Use arrow keys to move. Press enter to make a move. Press \'r\' to restart.");
+}
+
 void singleplayer_loop() {
   // HACK: 
   WINDOW* board_wnd = board->wnd;
@@ -171,15 +180,6 @@ void singleplayer_loop() {
     
     Board_show(board);
   }
-}
-
-void singleplayer_reset() {
-  Board_reset(board);
-  scoreboard_show(scoreboard_wnd, players, board->current_player - 1);
-  
-  move(LINES - 1, 0);
-  clrtoeol();
-  printw("Use arrow keys to move. Press enter to make a move. Press \'r\' to restart.");
 }
 
 void singleplayer_screen_init() {

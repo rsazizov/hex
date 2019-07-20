@@ -8,6 +8,10 @@
 static const int BOTTOM_NODE_ID = BOARD_SIZE * BOARD_SIZE;
 static const int TOP_NODE_ID = BOARD_SIZE * BOARD_SIZE + 1;
 
+int Board_yx_to_node_id(int y, int x) {
+  return BOARD_SIZE * x + y;
+}
+
 Board* Board_create(WINDOW* wnd) {
   Board* board = malloc(sizeof(Board));
 
@@ -151,11 +155,7 @@ bool Board_can_move(Board* board, int y, int x) {
 }
 
 bool Board_legal_and_taken(Board* board, Player player, int y, int x) {
-  return Board_is_legal_move(y, x) && board->state[y][x] == player;
-}
-
-int Board_yx_to_node_id(int y, int x) {
-  return BOARD_SIZE * x + y;
+  return Board_is_legal_move(y, x) && (int) board->state[y][x] == (int) player;
 }
 
 void Board_maybe_connect(Board* board, int by, int bx, int y, int x) {
