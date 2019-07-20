@@ -5,20 +5,43 @@
 #include <assert.h>
 #include <string.h>
 
+static const int BOTTOM_NODE_ID = BOARD_SIZE * BOARD_SIZE;
+static const int TOP_NODE_ID = BOARD_SIZE * BOARD_SIZE + 1;
+
 Board* Board_create(WINDOW* wnd) {
   Board* board = malloc(sizeof(Board));
 
-  board->current_player = 0;
+  board->current_player = Red;
+  board->winner = 0;
+
   assert(wnd != NULL);
   board->wnd = wnd;
 
+  board->sets[0] = DisjointSet_create(BOARD_SIZE * BOARD_SIZE + 2);
+  board->sets[1] = DisjointSet_create(BOARD_SIZE * BOARD_SIZE + 2);
+
   Board_reset(board);
+
+  // DisjointSet_union(board->sets[0], 1, 2);
+
+  for (int i = 0; i < BOARD_SIZE; ++i) {
+    DisjointSet_union(board->sets[0], Board_yx_to_node_id(i, 0), TOP_NODE_ID);
+    DisjointSet_union(board->sets[0], Board_yx_to_node_id(i, BOARD_SIZE - 1), BOTTOM_NODE_ID);
+  }
+
+  for (int i = 0; i < BOARD_SIZE; ++i) {
+    DisjointSet_union(board->sets[1], Board_yx_to_node_id(0, i), TOP_NODE_ID);
+    DisjointSet_union(board->sets[1], Board_yx_to_node_id(BOARD_SIZE - 1, i), BOTTOM_NODE_ID);
+  }
 
   return board;
 }
 
 void Board_free(Board* board) {
   free(board);
+
+  DisjointSet_free(board->sets[0]);
+  DisjointSet_free(board->sets[1]);
 }
 
 void Board_reset(Board* board) {
@@ -32,7 +55,7 @@ void Board_show_cell(Board* board, int j, int i) {
   const char* hex = "⬡";
   const char* hex_full = "⬢";
 
-  int hex_state = board->state[i][j];
+  int hex_state = board->state[j][i];
 
   int color_pair = hex_state + 1;
 
@@ -108,7 +131,7 @@ void Board_show(Board* board) {
   wrefresh(board->wnd);
 }
 
-bool Board_is_legal_move(Board* board, int y, int x) {
+bool Board_is_legal_move(int y, int x) {
   return y >= 0 && y < BOARD_SIZE && x >= 0 && x < BOARD_SIZE;
 }
 
@@ -116,15 +139,58 @@ int Board_get_current_player(Board* board) {
   return board->current_player;
 }
 
+bool Board_is_game_over(Board* board) {
+  return board->winner > 0;
+}
+
 bool Board_can_move(Board* board, int y, int x) {
-  return Board_is_legal_move(board, y, x)
+  return Board_is_legal_move(y, x)
     && board->state[y][x] == 0;
 }
 
-bool Board_make_move(Board* board, int player, int y, int x) {
-  if (!Board_can_move(board, y, x)) {
+bool Board_legal_and_taken(Board* board, Player player, int y, int x) {
+  return Board_is_legal_move(y, x) && board->state[y][x] == player;
+}
+
+int Board_yx_to_node_id(int y, int x) {
+  return BOARD_SIZE * x + y;
+}
+
+void Board_maybe_connect(Board* board, int by, int bx, int y, int x) {
+  if (Board_legal_and_taken(board, board->current_player, y, x)) {
+    DisjointSet* set = board->sets[board->current_player - 1];
+    DisjointSet_union(set, Board_yx_to_node_id(by, bx), Board_yx_to_node_id(y, x));
+  }
+}
+
+bool Board_make_move(Board* board, int y, int x) {
+  if (!Board_is_legal_move(y, x) || !Board_can_move(board, y, x)) {
     return false;
   }
 
-  return false;
+  board->state[y][x] = board->current_player;
+
+  int set_id = board->current_player - 1;
+  DisjointSet* set = board->sets[set_id];
+
+  Board_maybe_connect(board, y, x, y - 1, x);
+  Board_maybe_connect(board, y, x, y - 1, x + 1);
+  
+  Board_maybe_connect(board, y, x, y, x - 1);
+  Board_maybe_connect(board, y, x, y, x + 1);
+
+  Board_maybe_connect(board, y, x, y + 1, x - 1);
+  Board_maybe_connect(board, y, x, y + 1, x);
+
+  if (DisjointSet_query(set, TOP_NODE_ID, BOTTOM_NODE_ID)) {
+    board->winner = board->current_player;
+  }
+    
+  if (board->current_player == Red) {
+   board->current_player = Blue;
+  } else {
+   board->current_player = Red;
+  }
+
+  return true;
 }

@@ -4,6 +4,7 @@
 #include <form.h>
 #include <stdbool.h>
 
+#include "screen.h"
 #include "utils.h"
 #include "board.h"
 #include "scoreboard.h"
@@ -134,8 +135,23 @@ void singleplayer_loop() {
         break;
 
       case 10:
-        Board_make_move(board, board->current_player, cursor->y, cursor->x);
-        scoreboard_show(scoreboard_wnd, players, board->current_player);
+        if (Board_is_game_over(board)) {
+          // Board_reset(board);
+          // TODO: Reset the game
+          return;
+        }
+
+        Board_make_move(board, cursor->y, cursor->x);
+        
+        if (Board_is_game_over(board)) {
+          int winner = board->winner;
+          
+          move(LINES - 1, 0);
+          clrtoeol();
+          printw("%s wins! Press enter to start again. Ctrl-C to exit.", players[winner - 1]);
+        }
+
+        scoreboard_show(scoreboard_wnd, players, board->current_player - 1);
 
         break;
     }
@@ -173,8 +189,8 @@ void singleplayer_screen_show() {
     player2 = "Player 2";
   }
 
-  players[0] = player1;
-  players[1] = player2;
+  players[0] = trim(player1);
+  players[1] = trim(player2);
 
   erase();
   refresh();
@@ -185,10 +201,13 @@ void singleplayer_screen_show() {
   board = Board_create(board_wnd);
 
   Board_show(board);
-  scoreboard_show(scoreboard_wnd, players, board->current_player);
+  scoreboard_show(scoreboard_wnd, players, board->current_player - 1);
 
   wrefresh(board_wnd);
   refresh();
+
+  move(LINES - 1, 0);
+  printw("Use arrow keys to move. Enter to make a move.");
 
   singleplayer_loop();
 }

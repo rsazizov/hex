@@ -15,3 +15,5 @@ typedef struct {
 } Point;
 
 Point get_dimensions(const char* txt);
+
+char* trim(char* str);
