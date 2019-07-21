@@ -189,9 +189,9 @@ bool Board_make_move(Board* board, int y, int x) {
   }
     
   if (board->current_player == Red) {
-   board->current_player = Blue;
+    board->current_player = Blue;
   } else {
-   board->current_player = Red;
+    board->current_player = Red;
   }
 
   return true;

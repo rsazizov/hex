@@ -37,9 +37,9 @@ void handle_selection(const char* item) {
   if (!strcmp(item, item_names[0])) {
     set_current_screen(SCREEN_SP);
   } else if (!strcmp(item, item_names[1])) {
-    set_current_screen(SCREEN_START_SERVER);
+    set_current_screen(SCREEN_MP_LOCAL);
   } else if (!strcmp(item, item_names[2])) {
-    set_current_screen(SCREEN_CONNECT);
+    set_current_screen(SCREEN_MP_NET);
   }
 }
 
@@ -97,7 +97,7 @@ void show_menu() {
 
   // Menu title + empty line
   int menu_height = N_ITEMS + 2;
-  int menu_width = get_menu_width();
+  int menu_width = get_menu_width() + 1;
   
   WINDOW* menu_wnd = newwin_cx(menu_height, menu_width, 10);
 

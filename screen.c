@@ -6,6 +6,7 @@
 
 #include "menu_screen.h"
 #include "singleplayer_screen.h"
+#include "multiplayer_screen.h"
 
 void dummy() {}
 
@@ -16,11 +17,29 @@ struct {
   void(*show)();
   void(*close)();
 } screens[N_SCREENS] = {
-  [SCREEN_MENU] = { menu_screen_init, menu_screen_show, menu_screen_close },
-  [SCREEN_SP] = { singleplayer_screen_init, singleplayer_screen_show, singleplayer_screen_close },
-  [SCREEN_MP] = { dummy, dummy, dummy },
-  [SCREEN_START_SERVER] = { dummy, dummy, dummy },
-  [SCREEN_CONNECT] = { dummy, dummy, dummy }
+  [SCREEN_MENU] = { 
+    menu_screen_init,
+    menu_screen_show,
+    menu_screen_close
+  },
+  
+  [SCREEN_SP] = {
+    singleplayer_screen_init,
+    singleplayer_screen_show, 
+    singleplayer_screen_close 
+  },
+
+  [SCREEN_MP_LOCAL] = {
+    multiplayer_screen_init_local,
+    multiplayer_screen_show,
+    multiplayer_screen_close
+  },
+  
+  [SCREEN_MP_NET] = {
+    multiplayer_screen_init_net,
+    multiplayer_screen_show,
+    multiplayer_screen_close
+  }
 };
 
 void set_current_screen(int screen) {

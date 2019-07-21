@@ -3,10 +3,13 @@
 enum {
   SCREEN_MENU = 0,
   SCREEN_SP,
-  SCREEN_MP,
-  SCREEN_START_SERVER,
-  SCREEN_CONNECT,
-  
+
+  // Multiplayer connected to the localhost
+  SCREEN_MP_LOCAL,
+
+  // Multiplayer connected to a remote host
+  SCREEN_MP_NET,
+
   // Keep it last
   N_SCREENS
 };
