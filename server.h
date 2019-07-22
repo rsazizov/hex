@@ -3,16 +3,23 @@
 #include <stdbool.h>
 
 typedef struct {
-  // Server socket
-  int s;
+  // Server socket.
+  int sd;
 
+  // Number of connected clients.
+  // The game starts when both clients are connected.
   int n_connections;
   int client_sockets[2];
 
   bool running;
-  char* service;
 
+  char* port;
+
+  // Player names.
   char* players[2];
+
+  // Error message (if any).
+  char* error;
 } Server;
 
 Server* Server_create(const char* port);
@@ -23,7 +30,5 @@ void Server_close(Server* server);
 
 void Server_loop(Server* server);
 
-void Server_wait_for_connection(Server* server);
-bool Server_make_move(int player, int y, int x);
+void Server_wait_for_connections(Server* server);
 
-char* Server_get_opponent_name(Server* server);

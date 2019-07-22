@@ -24,12 +24,19 @@ void multiplayer_screen_init_net() {
 static Client* client;
 static Board* board;
 
-
 void multiplayer_screen_handle_move(Point move) {
   Board_make_move(board, move.y, move.x);
   werase(board->wnd);
   wrefresh(board->wnd);
   Board_show(board);
+
+  if (Board_is_game_over(board)) {
+      int winner = board->winner;
+      
+      move(LINES - 1, 0);
+      clrtoeol();
+      printw("Player %d wins! Press enter to start again. Ctrl-C to exit.", winner);
+  }
 }
 
 Point multiplayer_screen_make_move() {
@@ -68,7 +75,7 @@ Point multiplayer_screen_make_move() {
         //   singleplayer_reset();
         //   break;
         // }
-
+  
         if (Board_make_move(board, cursor->y, cursor->x)) {
           werase(board_wnd);
           wrefresh(board_wnd);

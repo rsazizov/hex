@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     Server* server = Server_create("3445");
     Server_start(server);
 
-    Server_wait_for_connection(server);
+    Server_wait_for_connections(server);
 
     Server_loop(server);
 
