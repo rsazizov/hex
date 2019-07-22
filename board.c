@@ -15,7 +15,8 @@ int Board_yx_to_node_id(int y, int x) {
 Board* Board_create(WINDOW* wnd) {
   Board* board = malloc(sizeof(Board));
 
-  assert(wnd != NULL);
+  // TODO: BoardView
+  // assert(wnd != NULL);
   board->wnd = wnd;
 
   board->sets[0] = DisjointSet_create(BOARD_SIZE * BOARD_SIZE + 2);

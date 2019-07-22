@@ -21,6 +21,8 @@ void Server_free(Server* server);
 bool Server_start(Server* server);
 void Server_close(Server* server);
 
+void Server_loop(Server* server);
+
 void Server_wait_for_connection(Server* server);
 bool Server_make_move(int player, int y, int x);
 

@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "package.h"
+
 Client* Client_create(const char* name) {
   Client* client = malloc(sizeof(Client));
 
@@ -61,13 +63,15 @@ bool Client_connect(Client* client, const char* host) {
 
   printf("Connected to the server.\n");
 
-  send(client->s, client->player, strlen(client->player), 0);
+  // send(client->s, client->player, strlen(client->player), 0);
 
-  char name[16];
-  recv(client->s, name, 15, 0);
+  // char name[16];
+  // recv(client->s, name, 15, 0);
 
   // TODO: free()
-  client->opponent = strdup(name);
+  // TODO: Fix name exchange
+  // client->opponent = strdup(name);
+  client->opponent = "";
 
   return true;
 }
@@ -81,6 +85,22 @@ bool Client_make_move(Client* client, int y, int x) {
 
 Point Client_wait_for_move(Client* client) {
   return (Point) {0, 0};
+}
+
+void Client_loop(Client* client, Point(*make_move)(void), void(handle_move)(Point)) {
+
+  while (1) {
+    Package p = recv_package(client->s);
+
+    if (!strcmp(p.op, OP_MOVE_REQUEST)) {
+      Point move = make_move();
+      Package move_pkg = {OP_MOVE, move.y, move.x};
+      send_package(client->s, move_pkg);
+    } else if (!strcmp(p.op, OP_MOVE)) {
+      handle_move((Point) {p.x, p.y});
+    }
+  }
+
 }
 
 bool Client_is_game_over(Client* client, int* winner) {

@@ -14,6 +14,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "board.h"
+#include "package.h"
+
 Server* Server_create(const char* port) {
   Server* server = malloc(sizeof(Server));
   server->running = false;
@@ -85,6 +88,40 @@ void Server_close(Server* server) {
   // TODO: free players
 }
 
+void Server_loop(Server* server) {
+  assert(server->n_connections == 2);
+
+  // At this point there has been a name exchange between the
+  // clients. The server should send a move request to the first
+  // client(?), update the board, notify the other player, etc...
+
+  Board* board = Board_create(NULL);
+
+  while (!Board_is_game_over(board)) {
+    // TODO: better switching
+    // TODO: fix MVU thing...
+    int sid = board->current_player - 1;
+    int socket = server->client_sockets[sid];
+    int other_socket = server->client_sockets[!sid];
+    
+
+    send_package(socket, (Package) {
+      OP_MOVE_REQUEST, -1, -1
+    });
+    
+    Package p = recv_package(socket);
+
+    printf("Player %d makes a move(%d, %d)\n", 
+            board->current_player, p.y, p.x);
+
+    send_package(other_socket, p);
+
+    assert(Board_make_move(board, p.y, p.x));
+  }
+
+  Board_free(board);
+}
+
 void Server_wait_for_connection(Server* server) {
   listen(server->s, 2);
   
@@ -105,20 +142,21 @@ void Server_wait_for_connection(Server* server) {
 
   printf("Got connection from idk\n");
 
-  if (server->n_connections > 1 ) {
-    send(*client_socket, server->players[0], strlen(server->players[0]), 0);
-  }
+  // if (server->n_connections > 1 ) {
+  //   size_t player_len = strlen(server->players[0]);
+  //   send(*client_socket, server->players[0], strlen(server->players[0]), 0);
+  // }
 
-  char op[16];
-  ssize_t len = recv(*client_socket, op, 16, 0);
+  // char op[16];
+  // ssize_t len = recv(*client_socket, op, 16, 0);
   
-  op[len] = '\0';
+  // op[len] = '\0';
 
-  server->players[server->n_connections - 1] = strdup(op);
+  // server->players[server->n_connections - 1] = strdup(op);
 
-  if (server->n_connections > 1) {
-    send(server->client_sockets[0], server->players[1], strlen(server->players[1]), 0);    
-  }
+  // if (server->n_connections > 1) {
+  //   send(server->client_sockets[0], server->players[1], strlen(server->players[1]), 0);    
+  // }
 
   if (server->n_connections < 2) {
     Server_wait_for_connection(server);
