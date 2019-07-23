@@ -65,7 +65,7 @@ void dialog_show(int height, int width, int y, const char* param, int max_len, c
   FIELD* fields[2];
   FORM* form;
 
-  fields[0] = new_field(1, max_len, 1, 7, 0, 0);
+  fields[0] = new_field(1, max_len, 1, strlen(param) + 1, 0, 0);
   fields[1] = NULL;
 
   set_field_back(fields[0], A_UNDERLINE);
@@ -87,11 +87,15 @@ void dialog_show(int height, int width, int y, const char* param, int max_len, c
   wrefresh(dialog_wnd);
   
   dialog_loop(dialog_wnd, form, fields, out);
+
+  free_field(fields[0]);
+  free_form(form);
+
   delwin(dialog_wnd);
 }
 
-void dialog_name_show(char** name) {
-  dialog_show(5, 32, 10, "Name: ", 16, name);
+void dialog_name_show(const char* txt, char** name) {
+  dialog_show(5, 32, 10, txt, 16, name);
 }
 
 void dialog_port_show(char** port) {

@@ -154,7 +154,7 @@ void multiplayer_screen_init_local() {
   player_color = Red;
   scoreboard_wnd = newwin(4, 25, 0, 70 - 25);
 
-  dialog_name_show(&name);
+  dialog_name_show("Name: ", &name);
   dialog_port_show(&port);
 
   server = Server_create(port);
@@ -169,7 +169,7 @@ void multiplayer_screen_init_net() {
   player_color = Blue;
   scoreboard_wnd = newwin(4, 25, 0, 70 - 25);
 
-  dialog_name_show(&name);
+  dialog_name_show("Name: ", &name);
   dialog_host_show(&host);
   dialog_port_show(&port);
 }
