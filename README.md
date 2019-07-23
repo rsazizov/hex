@@ -2,7 +2,7 @@
 
 ![Hex](https://github.com/rsazizov/hex/raw/master/screenshot.png "Hex")
 
-[Hex](https://en.wikipedia.org/wiki/Hex_(board_game)) is a connection game played on an 11x11 grid. My implmentation features ncurses based UI and a multiplayer.
+[Hex](https://en.wikipedia.org/wiki/Hex_(board_game)) is a connection game played on an 11x11 grid. My implementation features ncurses based UI and a multiplayer.
 
 ## Requirements
 
