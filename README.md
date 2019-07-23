@@ -21,6 +21,9 @@ A proper unicode font that supports "⬡"(U+2B21) and "⬢"(U+2B22) symbols is a
 ## Building
 
 ```
-make
-./hex
+git clone https://github.com/rsazizov/hex
+cd hex
+mkdir obj
+cd src
+make run
 ```
