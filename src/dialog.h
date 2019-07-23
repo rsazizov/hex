@@ -1,5 +1,7 @@
 #pragma once
 
-void dialog_name_show(const char* txt, char** name);
-void dialog_port_show(char** port);
-void dialog_host_show(char** host);
+#include <stddef.h>
+
+#define MAX_NAME_LEN 16
+
+void dialog_show(const char* txt, size_t max_len, char** out);

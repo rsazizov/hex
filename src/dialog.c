@@ -1,5 +1,8 @@
 #include "dialog.h"
+
 #include <stdlib.h>
+#include <string.h>
+
 #include <ncurses.h>
 #include <form.h>
 
@@ -54,7 +57,7 @@ void dialog_loop(WINDOW* dialog_wnd, FORM* form, FIELD** fields,
   }
 }
 
-void dialog_show(int height, int width, int y, const char* param, int max_len, char** out) {
+void dialog_show_commo(int height, int width, int y, const char* param, int max_len, char** out) {
   wclear(stdscr);
 
   WINDOW* dialog_wnd = newwin_cx(height, width, y);
@@ -94,15 +97,42 @@ void dialog_show(int height, int width, int y, const char* param, int max_len, c
   delwin(dialog_wnd);
 }
 
-void dialog_name_show(const char* txt, char** name) {
-  dialog_show(5, 32, 10, txt, 16, name);
-}
+void dialog_show(const char* txt, size_t max_len, char** out) {
+  wclear(stdscr);
 
-void dialog_port_show(char** port) {
-  dialog_show(5, 16, 10, "Port: ", 4, port);
-}
+  WINDOW* dialog_wnd = newwin_cx(5, 32, 7);
 
-void dialog_host_show(char** host) {
-  dialog_show(5, 32, 10, "Host: ", 16, host);
-}
+  keypad(dialog_wnd, 1);
+  box(dialog_wnd, 0, 0);
 
+  FIELD* fields[2];
+  FORM* form;
+
+  fields[0] = new_field(1, max_len, 1, strlen(txt) + 1, 0, 0);
+  fields[1] = NULL;
+
+  set_field_back(fields[0], A_UNDERLINE);
+  field_opts_off(fields[0], O_AUTOSKIP);
+
+  set_field_buffer(fields[0], 0, "");
+
+  form = new_form(fields);
+
+  set_form_win(form, dialog_wnd);
+  set_form_sub(form, dialog_wnd);
+
+  post_form(form);
+
+  wmove(dialog_wnd, 1, 1);
+  wprintw(dialog_wnd, txt);
+
+  refresh();
+  wrefresh(dialog_wnd);
+  
+  dialog_loop(dialog_wnd, form, fields, out);
+
+  free_field(fields[0]);
+  free_form(form);
+
+  delwin(dialog_wnd);
+}

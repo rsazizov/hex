@@ -99,8 +99,8 @@ void singleplayer_screen_show() {
   char* player1 = NULL;
   char* player2 = NULL;
 
-  dialog_name_show("Player 1: ", &player1);
-  dialog_name_show("Player 2: ", &player2);
+  dialog_show("Player 1: ", MAX_NAME_LEN, &player1);
+  dialog_show("Player 2: ", MAX_NAME_LEN, &player2);
 
   if (player1 == NULL  || *player1 == '\0') {
     player1 = "Player 1";
