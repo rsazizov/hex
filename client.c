@@ -77,13 +77,18 @@ bool Client_connect(Client* client, const char* host) {
   printf("Connected to the server.\n");
   client->connected = true;
 
-  // send(client->sd, client->player, strlen(client->player), 0);
+  // Je me presente.
+  
+  Package my_name_pkg;
+  my_name_pkg.op = OP_NAME;
+  my_name_pkg.name = client->player_name;
 
-  // char name[16];
-  // recv(client->sd, name, 15, 0);
+  send_package(client->sd, my_name_pkg);
 
-  // TODO: Fix name exchange
-  // client->opponent = strdup(name);
+  Package op_name_pkg = recv_package(client->sd);
+  assert(!strcmp(op_name_pkg.op, OP_NAME));
+
+  client->opponent_name = op_name_pkg.name;
 
   return true;
 }
@@ -95,6 +100,7 @@ void Client_close(Client* client) {
 }
 
 void Client_loop(Client* client, Point(*make_move)(void), void(handle_move)(Point)) {
+  printf("Playing with: %s\n", client->opponent_name);
 
   while (1) {
     Package p = recv_package(client->sd);

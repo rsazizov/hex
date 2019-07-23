@@ -126,6 +126,7 @@ void Server_loop(Server* server) {
     });
     
     Package p = recv_package(socket);
+    assert(!strcmp(p.op, OP_MOVE));
 
     printf("Player %d makes a move (%d, %d)\n", 
             board->current_player, p.y, p.x);
@@ -168,24 +169,29 @@ void Server_wait_for_connections(Server* server) {
 
   printf("Got connection from %s, %s\n", hbuf, sbuf);
 
-  // if (server->n_connections > 1 ) {
-  //   size_t player_len = strlen(server->players[0]);
-  //   send(*client_socket, server->players[0], strlen(server->players[0]), 0);
-  // }
+  Package pkg;
 
-  // char op[16];
-  // ssize_t len = recv(*client_socket, op, 16, 0);
-  
-  // op[len] = '\0';
+  pkg = recv_package(*client_socket);
+  assert(!strcmp(pkg.op, OP_NAME));
 
-  // server->players[server->n_connections - 1] = strdup(op);
+  printf("got %s\n", pkg.op);
+  server->players[server->n_connections - 1] = pkg.name;
 
-  // if (server->n_connections > 1) {
-  //   send(server->client_sockets[0], server->players[1], strlen(server->players[1]), 0);    
-  // }
+  if (server->n_connections > 1 ) {
+    Package op_name_pkg;
+    op_name_pkg.op = OP_NAME;
+    op_name_pkg.name = server->players[0];
+
+    send_package(*client_socket, op_name_pkg);
+  }
 
   if (server->n_connections == 2) {
     close(server->sd);
+    Package name_pkg;
+    name_pkg.op = OP_NAME;
+    name_pkg.name = server->players[1];
+    
+    send_package(server->client_sockets[0], name_pkg);
   } else {
     Server_wait_for_connections(server);
   }
