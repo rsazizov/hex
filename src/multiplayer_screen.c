@@ -37,6 +37,31 @@ void multiplayer_screen_show_scoreboard() {
   scoreboard_show(scoreboard_wnd, players, board->current_player - 1);
 }
 
+void multiplayer_screen_on_end() {
+  int winner = board->winner;
+  
+  const char* winner_name = NULL;
+
+  if (local) {
+    if (board->winner == 1) {
+      winner_name = client->player_name;
+    } else {
+      winner_name = client->opponent_name;
+    }
+  } else {
+    if (board->winner == 1) {
+      winner_name = client->opponent_name;
+    } else {
+      winner_name = client->player_name;
+    }
+  }
+
+  move(LINES - 2, 0);
+  clrtoeol();
+  printw("%s wins!\nPress enter to start again. Ctrl-C to exit.", winner_name);
+  refresh();
+}
+
 void multiplayer_screen_handle_move(Point move) {
   Board_make_move(board, move.y, move.x);
   werase(board->wnd);
@@ -46,11 +71,7 @@ void multiplayer_screen_handle_move(Point move) {
   Board_show(board);
 
   if (Board_is_game_over(board)) {
-      int winner = board->winner;
-      
-      move(LINES - 1, 0);
-      clrtoeol();
-      printw("Player %d wins! Press enter to start again. Ctrl-C to exit.", winner);
+    multiplayer_screen_on_end();
   }
 }
 
@@ -60,6 +81,8 @@ Point multiplayer_screen_make_move() {
   Point* cursor = &board->cursor;
 
   int ch;
+
+  flushinp();
 
   while (1) {
     ch = getch();
@@ -86,30 +109,19 @@ Point multiplayer_screen_make_move() {
         break;
 
       case 10:
-        // if (Board_is_game_over(board)) {
-        //   singleplayer_reset();
-        //   break;
-        // }
-  
         if (Board_make_move(board, cursor->y, cursor->x)) {
           werase(board_wnd);
           wrefresh(board_wnd);
           multiplayer_screen_show_scoreboard();
           Board_show(board);
+          
+          if (Board_is_game_over(board)) {
+            multiplayer_screen_on_end();
+          }
 
           return (Point) { cursor->x, cursor->y };
         }
         
-        // if (Board_is_game_over(board)) {
-        //   int winner = board->winner;
-          
-        //   move(LINES - 1, 0);
-        //   clrtoeol();
-        //   // printw("%s wins! Press enter to start again. Ctrl-C to exit."]);
-        // }
-
-        // scoreboard_show(scoreboard_wnd, players, board->current_player - 1);
-
         break;
     }
 
@@ -135,6 +147,7 @@ static char* port;
 static char* host;
 
 static Server* server;
+static pthread_t server_thid;
 
 void* server_thread(void* arg) {
   // TODO: Put initialization here?
@@ -148,6 +161,16 @@ void* server_thread(void* arg) {
   return NULL;
 }
 
+void start_server_thread() {
+  server = Server_create(port);
+  
+  if (pthread_create(&server_thid, NULL, server_thread, "Server thread") < 0) {
+    printw("pthread_create failed.\n");
+    getch();
+    set_current_screen(SCREEN_MENU);
+  }
+}
+
 void multiplayer_screen_init_local() {
   curs_set(1);
   local = true;
@@ -157,10 +180,9 @@ void multiplayer_screen_init_local() {
   dialog_show("Name: ", MAX_NAME_LEN, &name);
   dialog_show("Port: ", 4, &port);
 
-  server = Server_create(port);
-  
-  pthread_t tid;
-  pthread_create(&tid, NULL, server_thread, "Server thread");
+  start_server_thread();
+
+  refresh();
 }
 
 void multiplayer_screen_init_net() {
@@ -175,6 +197,9 @@ void multiplayer_screen_init_net() {
 }
 
 void multiplayer_screen_show() {
+  // Server is running at this point (if local).
+
+  curs_set(0);
 
   if (name == NULL || *name == '\0') {
     name = "<noname>";
@@ -203,7 +228,6 @@ void multiplayer_screen_show() {
   multiplayer_screen_show_scoreboard();
   Board_show(board);
 
-
   Client_loop(client, multiplayer_screen_make_move,
               multiplayer_screen_handle_move);
 
@@ -211,6 +235,10 @@ void multiplayer_screen_show() {
 }
 
 void multiplayer_screen_close() {
+  if (local) {
+    pthread_join(server_thid, NULL);
+  }
+
   Board_free(board);
   Client_free(client);
   Server_free(server);

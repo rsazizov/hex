@@ -74,8 +74,6 @@ bool Client_connect(Client* client, const char* host, const char* port) {
 
   freeaddrinfo(res);
 
-  // TODO: on_connected()?
-  printw("Connected to the server.\n");
   client->connected = true;
 
   // Je me presente.
@@ -101,8 +99,6 @@ void Client_close(Client* client) {
 }
 
 void Client_loop(Client* client, Point(*make_move)(void), void(handle_move)(Point)) {
-  printf("Playing with: %s\n", client->opponent_name);
-
   while (1) {
     Package p = recv_package(client->sd);
 

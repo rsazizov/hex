@@ -24,9 +24,6 @@ Server* Server_create(const char* port) {
 
   server->running = false;
 
-  // TODO: meh
-  assert(strlen(port) == 4);
-
   server->port = strdup(port);
   server->error = NULL;
   
@@ -55,6 +52,10 @@ void Server_free(Server* server) {
 
 bool Server_start(Server* server) {
   assert(!server->running);
+  
+  if (strlen(server->port) != 4) {
+    return false;
+  }
 
   // TODO: Proper error handling
   int status;
@@ -71,8 +72,8 @@ bool Server_start(Server* server) {
   status = getaddrinfo(NULL, server->port, &hints, &servinfo);
 
   if (status) {
-    printf("getaddrinfo failed: %d\n", status);
-    exit(1);
+    printw("getaddrinfo failed: %d\n", status);
+    return false;
   }
 
   server->sd = socket(servinfo->ai_family, servinfo->ai_socktype,
@@ -80,13 +81,13 @@ bool Server_start(Server* server) {
 
   int yes = 1;
   if (setsockopt(server->sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
-      printf("setsockopt failed: %d\n", errno);
-      exit(1);
+      printw("setsockopt failed: %d\n", errno);
+      return false;
   } 
 
   if (bind(server->sd, servinfo->ai_addr, servinfo->ai_addrlen)) {
-    printf("bind failed: %d\n", errno);
-    exit(1);
+    printw("bind failed: %d\n", errno);
+    return false;
   }
 
   freeaddrinfo(servinfo);
@@ -116,7 +117,6 @@ void Server_loop(Server* server) {
   Board* board = Board_create(NULL);
 
   while (!Board_is_game_over(board)) {
-    // TODO: better switching
     int sid = board->current_player - 1;
     int socket = server->client_sockets[sid];
     int other_socket = server->client_sockets[!sid];
@@ -128,14 +128,31 @@ void Server_loop(Server* server) {
     Package p = recv_package(socket);
     assert(!strcmp(p.op, OP_MOVE));
 
-    printf("Player %d makes a move (%d, %d)\n", 
-            board->current_player, p.y, p.x);
-
     send_package(other_socket, p);
 
     // This should never fail
     assert(Board_make_move(board, p.y, p.x));
   }
+
+  int winner_socket = -1;
+  int loser_socket = -1;
+
+  if (board->winner == 1) {
+    winner_socket = 0;
+    loser_socket = 1;
+  } else {
+    winner_socket = 1;
+    loser_socket = 0;
+  }
+
+  // Package win_pkg;
+  // win_pkg.op = OP_WIN;
+  // send_package(winner_socket, win_pkg);
+
+  // Package lose_pkg;
+  // lose_pkg.op = OP_LOSE;
+
+  // send_package(lost)
 
   // At this point the game is over. However, we want ask the
   // users if they want to play again.
@@ -157,8 +174,6 @@ void Server_wait_for_connections(Server* server) {
   struct sockaddr_storage in_addr;
 
   socklen_t addr_size = sizeof(in_addr);
-  
-  printf("Waiting for connections on %s\n", server->port);
 
   *client_socket = accept(server->sd, (struct sockaddr*) &in_addr, &addr_size);
 
@@ -166,8 +181,6 @@ void Server_wait_for_connections(Server* server) {
 
   getnameinfo((struct sockaddr*) &in_addr, addr_size, hbuf, 
       sizeof(hbuf), sbuf, sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
-
-  printf("Got connection from %s, %s\n", hbuf, sbuf);
 
   Package pkg;
 

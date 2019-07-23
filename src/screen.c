@@ -49,12 +49,13 @@ void set_current_screen(int screen) {
     screens[current_screen_id].close();
   }
 
-  erase();
-  refresh();
-
   current_screen_id = screen;
   
   screens[current_screen_id].init();
+
+  erase();
+  refresh();
+
   screens[current_screen_id].show();
 }
 
