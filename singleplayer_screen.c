@@ -111,9 +111,9 @@ void singleplayer_reset() {
   Board_reset(board);
   scoreboard_show(scoreboard_wnd, players, board->current_player - 1);
   
-  move(LINES - 1, 0);
+  move(LINES - 3, 0);
   clrtoeol();
-  printw("Use arrow keys to move. Press enter to make a move. Press \'r\' to restart.");
+  printw("Use arrow keys to move\nPress enter to place a hex.\nPress \'r\' to restart.");
 }
 
 void singleplayer_loop() {

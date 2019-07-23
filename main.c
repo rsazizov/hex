@@ -21,22 +21,11 @@ void free_curses(void) {
 }
 
 int main(int argc, char* argv[]) {
-  if (argc == 1) {
-    Server* server = Server_create("3445");
-    Server_start(server);
+  init_curses();
 
-    Server_wait_for_connections(server);
+  set_current_screen(SCREEN_MENU);
 
-    Server_loop(server);
-
-    Server_free(server);
-  } else {
-    init_curses();
-
-    set_current_screen(SCREEN_MENU);
-
-    free_curses();
-  }
+  free_curses();
 
   return 0;
 }

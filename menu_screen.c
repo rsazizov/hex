@@ -37,9 +37,9 @@ void handle_selection(const char* item) {
   if (!strcmp(item, item_names[0])) {
     set_current_screen(SCREEN_SP);
   } else if (!strcmp(item, item_names[1])) {
-    set_current_screen(SCREEN_MP_LOCAL);
-  } else if (!strcmp(item, item_names[2])) {
     set_current_screen(SCREEN_MP_NET);
+  } else if (!strcmp(item, item_names[2])) {
+    set_current_screen(SCREEN_MP_LOCAL);
   }
 }
 

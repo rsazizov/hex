@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
+#include <ncurses.h>
 
 #include "package.h"
 
@@ -38,7 +39,7 @@ void Client_free(Client* client) {
   free(client);
 }
 
-bool Client_connect(Client* client, const char* host) {
+bool Client_connect(Client* client, const char* host, const char* port) {
   assert(!client->connected);
 
   int status;
@@ -51,30 +52,30 @@ bool Client_connect(Client* client, const char* host) {
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-  status = getaddrinfo("localhost", "3445", &hints, &res);
+  status = getaddrinfo(host, port, &hints, &res);
 
   if (status) {
-    printf("getaddrinfo failed: %d\n", status);
-    exit(1);
+    printw("getaddrinfo failed: %d\n", status);
+    return false;
   }
 
   client->sd = socket(res->ai_family, res->ai_socktype,
                       res->ai_protocol);  
 
   if (client->sd < 0) {
-    printf("socket failed: %d\n", errno);
-    exit(1);
+    printw("socket failed: %d\n", errno);
+    return false;
   }
 
   if (connect(client->sd, res->ai_addr, res->ai_addrlen) < 0) {
-    printf("connect failed: %d\n", errno);
-    exit(1);
+    printw("connect failed: %d\n", errno);
+    return false;
   }
 
   freeaddrinfo(res);
 
   // TODO: on_connected()?
-  printf("Connected to the server.\n");
+  printw("Connected to the server.\n");
   client->connected = true;
 
   // Je me presente.

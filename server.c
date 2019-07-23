@@ -174,7 +174,6 @@ void Server_wait_for_connections(Server* server) {
   pkg = recv_package(*client_socket);
   assert(!strcmp(pkg.op, OP_NAME));
 
-  printf("got %s\n", pkg.op);
   server->players[server->n_connections - 1] = pkg.name;
 
   if (server->n_connections > 1 ) {

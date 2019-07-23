@@ -12,7 +12,7 @@ typedef struct {
 Client* Client_create(const char* name);
 void Client_free(Client* client);
 
-bool Client_connect(Client* client, const char* host);
+bool Client_connect(Client* client, const char* host, const char* port);
 void Client_close(Client* client);
 
 void Client_loop(Client* client, Point(*make_move)(void), void(handle_move)(Point));

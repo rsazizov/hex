@@ -57,14 +57,15 @@ Package recv_package(int socket) {
   op[HEADER_SIZE] = '\0';
 
   if (!strcmp(op, OP_MOVE)) {
-    // TODO: this code is garbage
     char buff[OP_MOVE_BODY_SIZE];
-    recv(socket, buff, 6, 0);
+    recv(socket, buff, OP_MOVE_BODY_SIZE, 0);
+
     buff[OP_MOVE_BODY_SIZE] = '\0';
 
     int x, y;
     // printf("recv_package(): %s\n", buff);
     sscanf(buff, "%d %d", &y, &x);
+    
     pkg.y = y;
     pkg.x = x;
   } else if (!strcmp(op, OP_NAME)) {
